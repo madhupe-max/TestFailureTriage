@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "defect-triage-agent"
+version = "0.1.0"
+description = "AI-driven defect triage agent built with LangGraph"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "langgraph>=0.2.39",
+  "langchain-core>=0.3.0",
+  "langchain-openai>=0.2.0",
+  "pydantic>=2.8.0",
+  "python-dotenv>=1.0.1",
+  "typer>=0.12.5",
+  "rich>=13.7.1",
+  "streamlit>=1.39.0",
+  "pandas>=2.2.3",
+  "plotly>=5.24.1"
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8.3.2"
+]
+
+[project.scripts]
+defect-triage = "defect_triage_agent.cli:app"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

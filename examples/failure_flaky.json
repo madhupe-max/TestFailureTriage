@@ -1,0 +1,12 @@
+{
+  "test_id": "SearchTests::test_results_order",
+  "suite": "SearchTests",
+  "logs": "Request timeout, retry succeeded on second attempt",
+  "stack_trace": "TimeoutError: service did not respond in time",
+  "metadata": {
+    "branch": "main",
+    "commit": "ff22aa1",
+    "pipeline": "github-actions",
+    "run_id": "12346"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "test_id": "CheckoutTests::test_payment_submit",
+  "suite": "CheckoutTests",
+  "logs": "HTTP 500 from /payments/submit while processing card",
+  "stack_trace": "AssertionError: expected 200 got 500",
+  "screenshot_path": "artifacts/payment_error.png",
+  "metadata": {
+    "branch": "main",
+    "commit": "a1b2c3d",
+    "pipeline": "github-actions",
+    "run_id": "12345"
+  }
+}
