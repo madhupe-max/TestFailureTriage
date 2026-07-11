@@ -90,6 +90,16 @@ Then open http://localhost:8501 to view:
 - Routing decisions (auto ticket, human review, auto resolve)
 - Recent event table
 
+## Flaky Detector
+
+Run the standalone flaky detector against a failure payload:
+
+```bash
+defect-triage flaky --input examples/failure_flaky.json
+```
+
+The detector scores retry-pass behavior, timeout signatures, intermittent wording, ordering issues, and recent outcome history.
+
 ## Notes
 
 - If no LLM is configured, the classifier uses deterministic heuristics.

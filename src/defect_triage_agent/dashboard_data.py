@@ -5,6 +5,8 @@ from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
 
+import streamlit as st
+
 
 def _parse_ts_day(timestamp: str) -> str:
     try:
@@ -27,6 +29,23 @@ def load_governance_events(events_path: Path) -> list[dict]:
         except json.JSONDecodeError:
             continue
     return events
+
+
+@st.cache_data(ttl=60)
+def load_flaky_assessment_records(history_path: Path) -> list[dict]:
+    if not history_path.exists():
+        return []
+
+    records: list[dict] = []
+    for line in history_path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            records.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    return records
 
 
 def aggregate_by_day(events: list[dict]) -> list[dict]:
@@ -76,4 +95,39 @@ def summary_metrics(events: list[dict]) -> dict[str, float]:
         "avg_confidence": avg_conf,
         "auto_ticket_rate": auto_ticket / total,
         "human_review_rate": human_review / total,
+    }
+
+
+def aggregate_flaky_rate_by_day(records: list[dict]) -> list[dict]:
+    by_day: dict[str, dict[str, int]] = defaultdict(lambda: {"assessments": 0, "flaky": 0})
+    for record in records:
+        day = _parse_ts_day(str(record.get("timestamp", "")))
+        by_day[day]["assessments"] += 1
+        if bool(record.get("is_flaky")):
+            by_day[day]["flaky"] += 1
+
+    return [
+        {
+            "day": day,
+            "assessments": values["assessments"],
+            "flaky": values["flaky"],
+            "flaky_rate": values["flaky"] / values["assessments"] if values["assessments"] else 0.0,
+        }
+        for day, values in sorted(by_day.items(), key=lambda item: item[0])
+    ]
+
+
+def top_flaky_tests(records: list[dict], limit: int = 10) -> list[dict]:
+    counts = Counter(str(record.get("test_id", "unknown")) for record in records if bool(record.get("is_flaky")))
+    return [{"test_id": test_id, "count": count} for test_id, count in counts.most_common(limit)]
+
+
+def flaky_summary(records: list[dict]) -> dict[str, float]:
+    total = len(records)
+    flaky = sum(1 for record in records if bool(record.get("is_flaky")))
+    average_score = sum(float(record.get("score", 0.0)) for record in records) / total if total else 0.0
+    return {
+        "total_assessments": float(total),
+        "flaky_rate": flaky / total if total else 0.0,
+        "average_score": average_score,
     }

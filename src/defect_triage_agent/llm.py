@@ -2,16 +2,27 @@ from __future__ import annotations
 
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
+from defect_triage_agent.flaky_detector import FlakyDetector
 from defect_triage_agent.models import ClassificationResult, FailureClassification, TriageInput
 
 
 @dataclass
 class FailureClassifier:
     model: str = "gpt-4o-mini"
+    flaky_detector: FlakyDetector = field(default_factory=FlakyDetector)
 
     def classify(self, triage_input: TriageInput, additional_context: list[str]) -> ClassificationResult:
+        flaky_assessment = self.flaky_detector.assess(triage_input, additional_context)
+        if flaky_assessment.is_flaky:
+            return ClassificationResult(
+                classification=FailureClassification.FLAKY,
+                confidence=flaky_assessment.score,
+                rationale=flaky_assessment.rationale,
+                root_cause_summary="Likely intermittent failure driven by retry, timeout, or shared-state signals.",
+            )
+
         llm_result = self._classify_with_llm(triage_input, additional_context)
         if llm_result is not None:
             return llm_result
@@ -83,7 +94,7 @@ class FailureClassifier:
         rationale = "Insufficient signals in failure evidence."
         summary = "Unable to determine root cause from current artifacts."
 
-        if any(k in text for k in ["timeout", "connection reset", "retry succeeded", "intermittent"]):
+        if any(k in text for k in ["timeout", "connection reset", "retry succeeded", "intermittent", "flaky"]):
             classification = FailureClassification.FLAKY
             confidence = 0.78
             rationale = "Intermittent or retry-driven signatures indicate flakiness."

@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from rich import print
 
 from defect_triage_agent.graph import DefectTriageAgent
+from defect_triage_agent.flaky_detector import FlakyDetector
 from defect_triage_agent.models import TriageInput
 
 app = typer.Typer(help="AI-driven defect triage agent")
@@ -72,6 +73,34 @@ def dashboard(port: int = typer.Option(8501, min=1, max=65535, help="Dashboard p
             str(port),
         ],
         check=True,
+    )
+
+
+@app.command()
+def flaky(
+    input: Path = typer.Option(..., exists=True, readable=True, help="Path to failure JSON"),
+):
+    load_dotenv()
+    payload = json.loads(input.read_text(encoding="utf-8"))
+    triage_input = TriageInput.model_validate(payload)
+    detector = FlakyDetector()
+    assessment = detector.assess(triage_input)
+    print(
+        {
+            "test_id": triage_input.test_id,
+            "is_flaky": assessment.is_flaky,
+            "score": round(assessment.score, 3),
+            "rationale": assessment.rationale,
+            "signals": [
+                {
+                    "name": signal.name,
+                    "present": signal.present,
+                    "weight": signal.weight,
+                    "evidence": signal.evidence,
+                }
+                for signal in assessment.signals
+            ],
+        }
     )
 
 
