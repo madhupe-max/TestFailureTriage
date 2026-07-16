@@ -1,0 +1,6 @@
+metric,b0
+regression_escape_rate,6
+mttt_hours,12
+false_failure_rate_pct,14
+ai_test_yield,1.2
+self_heal_effectiveness_pct,45

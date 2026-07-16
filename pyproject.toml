@@ -28,6 +28,7 @@ test = [
 
 [project.scripts]
 defect-triage = "defect_triage_agent.cli:app"
+kpi-targets = "defect_triage_agent.kpi_targets:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}

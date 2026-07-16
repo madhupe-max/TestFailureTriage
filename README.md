@@ -100,6 +100,28 @@ defect-triage flaky --input examples/failure_flaky.json
 
 The detector scores retry-pass behavior, timeout signatures, intermittent wording, ordering issues, and recent outcome history.
 
+## KPI Target Calculator (Step 1.2)
+
+Use the baseline sheet and calculator to generate Q+1 and Q+2 KPI targets from the charter formulas.
+
+1) Update baseline values in [examples/kpi_baseline_input.csv](examples/kpi_baseline_input.csv).
+
+2) Run the calculator:
+
+```bash
+./.venv/bin/python src/defect_triage_agent/kpi_targets.py \
+  --input examples/kpi_baseline_input.csv \
+  --output artifacts/kpi_targets.csv
+```
+
+Or, after installing the package in editable mode:
+
+```bash
+./.venv/bin/kpi-targets --input examples/kpi_baseline_input.csv --output artifacts/kpi_targets.csv
+```
+
+Output columns include baseline, Q+1 target, Q+2 target, metric direction, owner, and formula reference.
+
 ## Notes
 
 - If no LLM is configured, the classifier uses deterministic heuristics.
