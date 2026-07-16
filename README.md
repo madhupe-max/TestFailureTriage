@@ -122,6 +122,27 @@ Or, after installing the package in editable mode:
 
 Output columns include baseline, Q+1 target, Q+2 target, metric direction, owner, and formula reference.
 
+## KPI Scorecard (Step 2)
+
+The governance dashboard now reads [artifacts/kpi_targets.csv](artifacts/kpi_targets.csv) and publishes a KPI scorecard that:
+
+- compares current observed metrics against the Q+1 and Q+2 charter targets,
+- labels each KPI as `valid`, `directional`, or `blocked` based on data completeness,
+- makes blocked KPIs explicit instead of guessing values when telemetry is missing.
+
+Run the dashboard to view the scorecard:
+
+```bash
+./.venv/bin/defect-triage dashboard --port 8501
+```
+
+Today the repo can compute false failure rate directly from governance classifications. The remaining charter KPIs are shown as blocked until their telemetry is added to the artifacts, for example:
+
+- `owner_assigned_at` on governance events for MTTT,
+- `release_id` and `escaped_defect` for regression escape rate,
+- `ai_generated` provenance for AI test yield,
+- `heal_outcome` for self-heal effectiveness.
+
 ## Notes
 
 - If no LLM is configured, the classifier uses deterministic heuristics.
